@@ -1,0 +1,72 @@
+version: 2
+
+updates:
+  ###################################################################
+  # 1️⃣ GitHub Actions – keeps our workflow actions up-to-date
+  ###################################################################
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+    reviewers:
+      - "eumaios1212"
+#      - "Homeric-Freedom/Hummingbot-Team"      # @org/team-name
+#      - "Homeric-Freedom/API-Team"             # @org/team-name
+
+
+  ###################################################################
+  # 2️⃣ Node / npm
+  ###################################################################
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "eumaios1212"
+#      - "Homeric-Freedom/Hummingbot-Team"      # @org/team-name
+#      - "Homeric-Freedom/API-Team"             # @org/team-name
+
+
+  ###################################################################
+  # 3️⃣ Python / pip
+  ###################################################################
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+    reviewers:
+      - "eumaios1212"
+#      - "Homeric-Freedom/Hummingbot-Team"   # @org/team-name
+#      - "Homeric-Freedom/API-Team"          # @org/team-name
+
+
+  ###################################################################
+  # 4️⃣ Go modules
+  ###################################################################
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+    reviewers:
+      - "eumaios1212"
+#      - "Homeric-Freedom/Hummingbot-Team"   # @org/team-name
+#      - "Homeric-Freedom/API-Team"          # @org/team-name
+
+
+  ###################################################################
+  # 5️⃣ Java / Gradle
+  ###################################################################
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+    reviewers:
+      - "eumaios1212"
+#      - "Homeric-Freedom/Hummingbot-Team"   # @org/team-name
+#      - "Homeric-Freedom/API-Team"          # @org/team-name
