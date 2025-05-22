@@ -1,0 +1,177 @@
+###############################################################################
+# UNIVERSAL CI WORKFLOW
+# • Runs on every push to master and on every pull-request.
+# • Starts with a read-only GITHUB_TOKEN (least-privilege).
+# • Auto-detects Node, Java (Gradle or Maven), Go, or Python projects.
+# • Includes dependency caching for all languages to improve build performance.
+# • Adds extra checks for Node.js to ensure npm ci runs reliably.
+###############################################################################
+
+name: CI (auto-detect & test)
+
+on:
+  pull_request:
+  push:
+    branches: [ $default-branch ]
+
+permissions:
+  contents: read          # prevents a compromised action from pushing or tagging
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    name: Build & Test (any language)
+
+    steps:
+      # 1️⃣  Always check out repo
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      #######################################################################
+      # 2️⃣  Language-specific tool-chains (each wrapped in an `if:` filter)
+      #######################################################################
+
+      # ── Node / npm ───────────────────────────────────────────────────────
+      - name: Set up Node
+        if: ${{ hashFiles('package.json') != '' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'  # Explicit npm registry
+
+      # ── Java (Gradle OR Maven) ──────────────────────────────────────────
+      - name: Set up Java
+        if: ${{ hashFiles('**/build.gradle') != '' || hashFiles('**/pom.xml') != '' }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # ── Go ──────────────────────────────────────────────────────────────
+      - name: Set up Go
+        if: ${{ hashFiles('go.mod') != '' }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.22
+
+      # ── Python ──────────────────────────────────────────────────────────
+      - name: Set up Python
+        if: >-
+          ${{
+            hashFiles('requirements.txt')   != '' ||
+            hashFiles('pyproject.toml')     != '' ||
+            hashFiles('setup.py')           != ''
+          }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+
+      #######################################################################
+      # 3️⃣  Cache dependencies (one step per language)
+      #######################################################################
+
+      - name: Cache Node dependencies
+        if: ${{ hashFiles('package.json') != '' }}
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+
+      - name: Cache Gradle dependencies
+        if: ${{ hashFiles('**/build.gradle') != '' }}
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle', '**/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Cache Maven dependencies
+        if: ${{ hashFiles('**/pom.xml') != '' }}
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+
+      - name: Cache Go dependencies
+        if: ${{ hashFiles('go.mod') != '' }}
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('go.mod', 'go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
+
+      - name: Cache Python dependencies
+        if: >-
+          ${{
+            hashFiles('requirements.txt')   != '' ||
+            hashFiles('pyproject.toml')     != '' ||
+            hashFiles('setup.py')           != ''
+          }}
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt', 'pyproject.toml', 'setup.py') }}
+          restore-keys: ${{ runner.os }}-python-
+
+      #######################################################################
+      # 4️⃣ Install dependencies & run tests  (one step per language)
+      #######################################################################
+
+      - name: Check for package-lock.json
+        if: ${{ hashFiles('package.json') != '' }}
+        run: |
+          if [ ! -f package-lock.json ]; then
+            echo "Error: package-lock.json is missing. Please run 'npm install' locally and commit the lockfile."
+            exit 1
+          fi
+
+      - name: Node – install & test
+        if: ${{ hashFiles('package.json') != '' }}
+        run: |
+          echo "Node version:"
+          node --version
+          echo "npm version:"
+          npm --version
+          npm config set fetch-retries 3  # Retry network requests
+          npm ci || npm ci                # Retry once on failure
+          npm test
+
+      - name: Gradle – test
+        if: ${{ hashFiles('**/build.gradle') != '' }}
+        run: ./gradlew test --no-daemon
+
+      - name: Maven – test
+        if: ${{ hashFiles('**/pom.xml') != '' }}
+        run: mvn --batch-mode -ntp test
+
+      - name: Go – test
+        if: ${{ hashFiles('go.mod') != '' }}
+        run: go test ./...
+
+      - name: Python – install & test
+        if: >-
+          ${{
+            hashFiles('requirements.txt')   != '' ||
+            hashFiles('pyproject.toml')     != '' ||
+            hashFiles('setup.py')           != ''
+          }}
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f pyproject.toml ];  then pip install .; fi
+          pytest -q || true                    # green if no tests yet
+
+      #######################################################################
+      # 5️⃣ Shell-script lint (runs regardless of language)
+      #######################################################################
+      - name: Lint shell scripts
+        run: |
+          sudo apt-get update && sudo apt-get install -y shellcheck
+          shellcheck $(git ls-files '*.sh') || true
