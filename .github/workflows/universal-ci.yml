@@ -7,12 +7,11 @@
 # • Adds extra checks for Node.js to ensure npm ci runs reliably.
 ###############################################################################
 
-name: CI (auto-detect & test)
+name: Universal CI
 
 on:
-  pull_request:
-  push:
-    branches: [ $default-branch ]
+  workflow_call:        # ← makes it reusable
+    secrets: inherit    # pass caller secrets through for the checkout and cache steps
 
 permissions:
   contents: read          # prevents a compromised action from pushing or tagging
