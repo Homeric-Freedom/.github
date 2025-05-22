@@ -1,0 +1,14 @@
+{
+  "name": "Universal CI (auto-detect)",
+  "description": "One pipeline that auto-detects Node, Java, Go or Python and runs tests with caching.",
+  "iconName": "beaker",
+  "categories": ["Continuous integration"],
+  "filePatterns": [
+    "package.json$",
+    "pom.xml$",
+    "build.gradle$",
+    "go.mod$",
+    "requirements.txt$",
+    "pyproject.toml$"
+  ]
+}
