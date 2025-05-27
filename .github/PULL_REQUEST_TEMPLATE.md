@@ -10,7 +10,7 @@ Provide a detailed explanation of *WHAT* this PR does and *WHY* it's needed.
 
 [required body]
 
-[footer(s): required, when linked to a specifc Issue]
+[footer(s): required, when linked to a specific Issue]
 ```
 `<type>` can be one of the following:
 - ci: Changes to continuous integration (CI) configuration, scripts, or workflows (e.g., updating GitHub Actions, build pipelines, or deployment processes).
