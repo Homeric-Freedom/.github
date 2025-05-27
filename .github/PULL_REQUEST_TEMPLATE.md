@@ -5,7 +5,7 @@ Provide a detailed explanation of *WHAT* this PR does and *WHY* it's needed.
 ### ✅ Checklist
 - [ ] Commit messages have the following format:
 
-```
+```text
 <type>: <description of change>
 
 [required body]
@@ -21,7 +21,7 @@ Provide a detailed explanation of *WHAT* this PR does and *WHY* it's needed.
 - wip: Work-in-progress commits, indicating incomplete or temporary changes that are not ready for production or final review.
 
 Example:
-```
+```text
 ci: add commitlint to CI pipeline
 
 Added commitlint configuration and GitHub Action workflow to enforce conventional commit messages. This ensures all commits follow the project's commit message format (e.g., type: description) for better changelog generation and readability.
