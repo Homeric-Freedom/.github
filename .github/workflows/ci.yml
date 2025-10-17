@@ -34,7 +34,7 @@ jobs:
       # ── Node / npm ───────────────────────────────────────────────────────
       - name: Set up Node
         if: ${{ hashFiles('package.json') != '' }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'  # Explicit npm registry
