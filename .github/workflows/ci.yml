@@ -1,6 +1,6 @@
 ###############################################################################
 # UNIVERSAL CI WORKFLOW
-# • Runs on every push to master and on every pull-request.
+# • Runs on every push to master/dev and on every pull-request.
 # • Starts with a read-only GITHUB_TOKEN (least-privilege).
 # • Auto-detects Node, Java (Gradle or Maven), Go, or Python projects.
 # • Includes dependency caching for all languages to improve build performance.
@@ -12,7 +12,7 @@ name: CI (auto-detect & test)
 on:
   pull_request:
   push:
-    branches: [ master ]
+    branches: [ master, dev ]
 
 permissions:
   contents: read          # prevents a compromised action from pushing or tagging
